@@ -1,10 +1,10 @@
-package com.catsoft.demo.SpringBootMicroservice;
+package com.catsoft.demo.icecreamparlor;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SpringBootMicroserviceApplicationTests {
+class SomeTests {
 
 	@Test
 	void contextLoads() {
