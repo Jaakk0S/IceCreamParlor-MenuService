@@ -1,13 +1,12 @@
 package com.catsoft.demo.icecreamparlor.jpa;
 
 import com.catsoft.demo.icecreamparlor.dto.ToppingDTO;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
+import java.util.List;
+
+@Entity(name = "TOPPING")
 @Getter
 @Setter
 @Builder
@@ -21,7 +20,14 @@ public class Topping {
 
     private String name;
 
+    @ManyToMany(mappedBy="toppings")
+    private List<Product> products;
+
     public ToppingDTO toDTO() {
-        return new ToppingDTO(this.getId(), this.getName());
+        return new ToppingDTO(
+                this.getId(),
+                this.getName(),
+                this.products == null ? null : this.products.stream().map(p -> p.toDTO(true)).toList()
+        );
     }
 }

@@ -2,9 +2,12 @@ package com.catsoft.demo.icecreamparlor.controller;
 
 import com.catsoft.demo.icecreamparlor.dto.ToppingDTO;
 import com.catsoft.demo.icecreamparlor.jpa.Flavor;
+import com.catsoft.demo.icecreamparlor.jpa.Product;
 import com.catsoft.demo.icecreamparlor.jpa.Topping;
+import com.catsoft.demo.icecreamparlor.repository.ProductRepository;
 import com.catsoft.demo.icecreamparlor.repository.ToppingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +27,9 @@ public class ToppingController {
 
     @Autowired
     private ToppingRepository toppingRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
 
 
@@ -48,6 +54,16 @@ public class ToppingController {
 
     @DeleteMapping("/topping/{id}")
     void deleteTopping(@PathVariable Integer id) {
-        this.toppingRepository.deleteById(id);
+        this.toppingRepository.findById(id).ifPresentOrElse(
+                t -> {
+                    List<Product> productsWithTopping = StreamSupport.stream(this.productRepository.findAll().spliterator(),
+                            false).filter(p -> p.getToppings().stream().anyMatch(t2 -> t2.getId() == id)).toList();
+                    if (productsWithTopping.isEmpty())
+                        this.toppingRepository.deleteById(id);
+                    else
+                        throw new ResponseStatusException(HttpStatusCode.valueOf(409));
+                },
+                () -> { throw new ResponseStatusException(HttpStatusCode.valueOf(204)); }
+        );
     }
 }

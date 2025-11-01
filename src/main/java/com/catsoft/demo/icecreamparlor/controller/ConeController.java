@@ -4,6 +4,7 @@ import com.catsoft.demo.icecreamparlor.dto.ConeDTO;
 import com.catsoft.demo.icecreamparlor.jpa.Cone;
 import com.catsoft.demo.icecreamparlor.jpa.Product;
 import com.catsoft.demo.icecreamparlor.repository.ConeRepository;
+import com.catsoft.demo.icecreamparlor.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,9 @@ public class ConeController {
 
     @Autowired
     private ConeRepository coneRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
 
     @GetMapping("/cone")
@@ -47,6 +51,16 @@ public class ConeController {
 
     @DeleteMapping("/cone/{id}")
     void deleteCone(@PathVariable Integer id) {
-        this.coneRepository.deleteById(id);
+        this.coneRepository.findById(id).ifPresentOrElse(
+                t -> {
+                    List<Product> productsWithCone = StreamSupport.stream(this.productRepository.findAll().spliterator(),
+                            false).filter(p -> p.getCone().getId() == id).toList();
+                    if (productsWithCone.isEmpty())
+                        this.coneRepository.deleteById(id);
+                    else
+                        throw new ResponseStatusException(HttpStatusCode.valueOf(409));
+                },
+                () -> { throw new ResponseStatusException(HttpStatusCode.valueOf(204)); }
+        );
     }
 }

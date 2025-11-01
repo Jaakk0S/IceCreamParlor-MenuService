@@ -1,14 +1,12 @@
 package com.catsoft.demo.icecreamparlor.jpa;
 
-import com.catsoft.demo.icecreamparlor.dto.ConeDTO;
 import com.catsoft.demo.icecreamparlor.dto.FlavorDTO;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
+import java.util.List;
+
+@Entity(name = "FLAVOR")
 @Getter
 @Setter
 @Builder
@@ -21,6 +19,9 @@ public class Flavor {
     private int id;
 
     private String name;
+
+    @OneToMany(mappedBy="flavor")
+    private List<Product> products;
 
     public FlavorDTO toDTO() {
         return new FlavorDTO(this.getId(), this.getName());

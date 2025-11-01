@@ -4,14 +4,17 @@ import com.catsoft.demo.icecreamparlor.dto.ConeDTO;
 import com.catsoft.demo.icecreamparlor.dto.FlavorDTO;
 import com.catsoft.demo.icecreamparlor.dto.ProductDTO;
 import com.catsoft.demo.icecreamparlor.dto.ToppingDTO;
+import com.catsoft.demo.icecreamparlor.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -20,11 +23,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class ProductIntegrationTests extends AbstractIntegrationTests {
 
+    @Autowired
+    private ProductRepository productRepository;
 
 
     @Test
     void menuEntryGETShouldReturnAllProducts() {
-        ProductDTO[] response = this.restTemplate.getForObject(super.getUrl("menu-entry", -1), ProductDTO[].class);
+        ProductDTO[] response = super.exchangeAndExpectStatus(super.getUrl("menu-entry", -1), HttpMethod.GET, null, 200, ProductDTO[].class);
         assertThat(response).isNotNull();
         assertThat(response.length).isEqualTo(4);
     }
@@ -33,6 +38,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void menuEntryPOSTShouldReturnCreatedProduct_WhenRequestBodyIsCorrect() {
         int nrExistingCones = this.restTemplate.getForObject(super.getUrl("cone", -1), ConeDTO[].class).length;
         int nrExistingFlavors = this.restTemplate.getForObject(super.getUrl("cone", -1), FlavorDTO[].class).length;
@@ -43,10 +49,10 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
                 "New product",
                 new ConeDTO(1, "nameDoesntMatter"),
                 new FlavorDTO(1, "nameDoesntMatter"),
-                List.of(new ToppingDTO(1, "nameDoesntMatter"))
+                List.of(new ToppingDTO(1, "nameDoesntMatter", null))
         );
         var body = new HttpEntity<>(payload, null);
-        ProductDTO response = this.restTemplate.postForObject(super.getUrl("menu-entry", -1), body, ProductDTO.class);
+        ProductDTO response = super.exchangeAndExpectStatus(super.getUrl("menu-entry", -1), HttpMethod.POST, body, 200, ProductDTO.class);
         assertThat(response).isNotNull();
         assertThat(response.id()).isGreaterThan(0);
 
@@ -61,11 +67,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void menuEntryPOSTShouldReturnBadRequest_WhenRequestBodyIsMissing() {
-        try {
-            this.restTemplate.postForEntity(super.getUrl("menu-entry", -1), null, ProductDTO.class);
-        } catch (HttpClientErrorException e) {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
-        }
+        super.exchangeAndExpectStatus(super.getUrl("menu-entry", -1), HttpMethod.POST, null, 400, ProductDTO.class);
     }
 
     @Test
@@ -75,14 +77,11 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
                 "New product",
                 null,
                 new FlavorDTO(0, "nameDoesntMatter"),
-                List.of(new ToppingDTO(0, "nameDoesntMatter"))
+                List.of(new ToppingDTO(0, "nameDoesntMatter", null))
         );
         var body = new HttpEntity<ProductDTO>(payload, null);
-        try {
-            this.restTemplate.postForEntity(super.getUrl("menu-entry", -1), body, ProductDTO.class);
-        } catch (HttpClientErrorException e) {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
-        }
+        ResponseEntity<Object> result = this.restTemplate.exchange(super.getUrl("menu-entry", -1), HttpMethod.POST, body, Object.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
     }
 
 
@@ -90,19 +89,20 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void menuEntryGETWithIdShouldReturnProduct_WhenIdFound() {
-        ProductDTO response = this.restTemplate.getForObject(super.getUrl("menu-entry", 1), ProductDTO.class);
+        ProductDTO response = super.exchangeAndExpectStatus(super.getUrl("menu-entry", 1), HttpMethod.GET, null, 200, ProductDTO.class);
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(1);
         assertThat(response.name()).isEqualTo("Fudge Sundae");
+        assertThat(response.cone().name()).isEqualTo("waffle bowl");
+        assertThat(response.flavor().name()).isEqualTo("chocolate");
+        assertThat(response.toppings().size()).isEqualTo(2);
+        assertThat(response.toppings()).filteredOn(t -> t.name().equals("mini candy cane")).isNotEmpty();
+        assertThat(response.toppings()).filteredOn(t -> t.name().equals("melted fudge")).isNotEmpty();
     }
 
     @Test
     void menuEntryGETWithIdShouldReturnNotFound_WhenIdNotFound() {
-        try {
-            this.restTemplate.getForEntity(super.getUrl("menu-entry", 1234), ProductDTO.class);
-        } catch (HttpClientErrorException e) {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(404));
-        }
+        super.exchangeAndExpectStatus(super.getUrl("menu-entry", 1234), HttpMethod.GET, null, 404, ProductDTO.class);
     }
 
 
@@ -111,30 +111,25 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void menuEntryDELETEWithIdShouldDeleteProduct_WhenIdFound() {
-        final int deletedId = 1;
+        final int deleteId = 1;
 
         // Product exists
-        var response = this.restTemplate.getForEntity(super.getUrl("menu-entry", deletedId), ProductDTO.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
+        super.exchangeAndExpectStatus(super.getUrl("menu-entry", deleteId), HttpMethod.GET, null, 200, ProductDTO.class);
 
         // Product delete succeeds
-        this.restTemplate.delete(super.getUrl("menu-entry", deletedId));
+        super.exchangeAndExpectStatus(super.getUrl("menu-entry", deleteId), HttpMethod.DELETE, null, 204, ProductDTO.class);
 
         // Product doesn't exist
-        try {
-            this.restTemplate.getForEntity(super.getUrl("menu-entry", deletedId), ProductDTO.class);
-        } catch (HttpClientErrorException e) {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(404));
-        }
+        super.exchangeAndExpectStatus(super.getUrl("menu-entry", deleteId), HttpMethod.GET, null, 404, ProductDTO.class);
+
+        // ManyToMany join table is cascaded upon deletion
+        Object[] productToppingsWithProductId = this.productRepository.findRowsInProductToppings(deleteId);
+        assertThat(productToppingsWithProductId).isEmpty();
     }
 
     @Test
     void menuEntryDELETEWithIdShouldReturnNotFound_WhenIdNotFound() {
-        try {
-            this.restTemplate.delete(super.getUrl("menu-entry", 1234));
-        } catch (HttpClientErrorException ex) {
-            assertThat(ex.getStatusCode()).isEqualTo(HttpStatusCode.valueOf((404)));
-        }
+        super.exchangeAndExpectStatus(super.getUrl("menu-entry", 1234), HttpMethod.DELETE, null, 204, ProductDTO.class);
     }
 
 }

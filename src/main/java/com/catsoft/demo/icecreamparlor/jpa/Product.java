@@ -9,7 +9,7 @@ import lombok.*;
 
 import java.util.List;
 
-@Entity
+@Entity(name = "PRODUCT")
 @Getter
 @Setter
 @Builder
@@ -23,15 +23,15 @@ public class Product {
 
     private String name;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "CONE", referencedColumnName = "ID")
     private Cone cone;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "FLAVOR", referencedColumnName = "ID")
     private Flavor flavor;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
         name = "PRODUCT_TOPPINGS",
         joinColumns = @JoinColumn(name = "PRODUCT_ID"),
@@ -39,7 +39,7 @@ public class Product {
     )
     private List<Topping> toppings;
 
-    public ProductDTO toDTO() {
+    public ProductDTO toDTO(boolean omitToppings) {
         return new ProductDTO(
                 this.getId(),
                 this.getName(),
@@ -51,7 +51,7 @@ public class Product {
                         this.getFlavor().getId(),
                         this.getFlavor().getName()
                 ),
-                this.getToppings().stream().map(t -> new ToppingDTO(t.getId(), t.getName())).toList()
+                omitToppings ? null : this.getToppings().stream().map(Topping::toDTO).toList()
         );
     }
 }

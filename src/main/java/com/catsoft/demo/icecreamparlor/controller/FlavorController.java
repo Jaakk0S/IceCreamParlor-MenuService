@@ -4,7 +4,12 @@ import com.catsoft.demo.icecreamparlor.dto.ConeDTO;
 import com.catsoft.demo.icecreamparlor.dto.FlavorDTO;
 import com.catsoft.demo.icecreamparlor.jpa.Cone;
 import com.catsoft.demo.icecreamparlor.jpa.Flavor;
+import com.catsoft.demo.icecreamparlor.jpa.Product;
 import com.catsoft.demo.icecreamparlor.repository.FlavorRepository;
+import com.catsoft.demo.icecreamparlor.repository.ProductRepository;
+import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
+import org.hibernate.JDBCException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +31,9 @@ public class FlavorController {
 
     @Autowired
     private FlavorRepository flavorRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
 
     @GetMapping("/flavor")
@@ -49,6 +57,14 @@ public class FlavorController {
 
     @DeleteMapping("/flavor/{id}")
     void deleteFlavor(@PathVariable Integer id) {
-        this.flavorRepository.deleteById(id);
+        this.flavorRepository.findById(id).ifPresentOrElse(
+                f -> {
+                    if (f.getProducts().isEmpty())
+                        this.flavorRepository.deleteById(id);
+                    else
+                        throw new ResponseStatusException(HttpStatusCode.valueOf(409));
+                },
+                () -> { throw new ResponseStatusException(HttpStatusCode.valueOf(204)); }
+        );
     }
 }

@@ -1,7 +1,6 @@
 package com.catsoft.demo.icecreamparlor.controller;
 
 import com.catsoft.demo.icecreamparlor.dto.ProductDTO;
-import com.catsoft.demo.icecreamparlor.dto.ToppingDTO;
 import com.catsoft.demo.icecreamparlor.jpa.Cone;
 import com.catsoft.demo.icecreamparlor.jpa.Flavor;
 import com.catsoft.demo.icecreamparlor.jpa.Product;
@@ -10,6 +9,7 @@ import com.catsoft.demo.icecreamparlor.repository.ConeRepository;
 import com.catsoft.demo.icecreamparlor.repository.FlavorRepository;
 import com.catsoft.demo.icecreamparlor.repository.ProductRepository;
 import com.catsoft.demo.icecreamparlor.repository.ToppingRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatusCode;
@@ -33,41 +33,32 @@ public class ProductController {
     private ProductRepository productRepository;
 
     @Autowired
-    private ConeRepository coneRepository;
-
-    @Autowired
-    private FlavorRepository flavorRepository;
-
-    @Autowired
-    private ToppingRepository toppingRepository;
-
-    @Autowired
     private ApplicationContext context;
 
 
     @GetMapping("/menu-entry")
     List<ProductDTO> getAllProducts() {
-        return StreamSupport.stream(this.productRepository.findAll().spliterator(), false).map(Product::toDTO).toList();
+        return StreamSupport.stream(this.productRepository.findAll().spliterator(), false).map(p -> p.toDTO(false)).toList();
     }
 
     @PostMapping("/menu-entry")
-    ProductDTO addProduct(@RequestBody ProductDTO product) {
-        Cone existingCone = this.coneRepository.findById(product.cone().id());
-        Flavor existingFlavor = this.flavorRepository.findById(product.flavor().id());
-        List<Topping> existingToppings = (List<Topping>) this.toppingRepository.findAllById(product.toppings().stream().map(ToppingDTO::id).toList());
+    ProductDTO addProduct(@Valid @RequestBody ProductDTO product) {
         Product entity = Product.builder()
                 .name(product.name())
-                .cone(existingCone)
-                .flavor(existingFlavor)
-                .toppings(existingToppings)
+                .cone(Cone.builder().id(product.cone().id()).build())
+                .flavor(Flavor.builder().id(product.flavor().id()).build())
+                .toppings(product.toppings().stream().map(
+                        t -> Topping.builder().id(t.id())
+                                .build()
+                ).toList())
                 .build();
         entity = this.productRepository.save(entity);
-        return entity.toDTO();
+        return entity.toDTO(false);
     }
 
     @GetMapping("/menu-entry/{id}")
     ProductDTO getProduct(@PathVariable Integer id) {
-        return this.productRepository.findById(id).map(Product::toDTO).orElseThrow(() -> {
+        return this.productRepository.findById(id).map(p -> p.toDTO(false)).orElseThrow(() -> {
             return new ResponseStatusException(HttpStatusCode.valueOf(404));
         });
     }
@@ -75,6 +66,7 @@ public class ProductController {
     @DeleteMapping("/menu-entry/{id}")
     void deleteProduct(@PathVariable Integer id) {
         this.productRepository.deleteById(id);
+        throw new ResponseStatusException(HttpStatusCode.valueOf(204));
     }
 
 }

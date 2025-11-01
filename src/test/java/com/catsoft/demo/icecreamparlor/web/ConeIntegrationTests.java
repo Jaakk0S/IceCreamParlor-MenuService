@@ -1,15 +1,13 @@
 package com.catsoft.demo.icecreamparlor.web;
 
 import com.catsoft.demo.icecreamparlor.dto.ConeDTO;
+import com.catsoft.demo.icecreamparlor.dto.ToppingDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.web.client.HttpClientErrorException;
-
-import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +18,7 @@ public class ConeIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void coneGETShouldReturnAllCones() {
-        ConeDTO[] response = this.restTemplate.getForObject(super.getUrl("cone", -1), ConeDTO[].class);
+        ConeDTO[] response = super.exchangeAndExpectStatus(super.getUrl("cone", -1), HttpMethod.GET, null, 200, ConeDTO[].class);
         assertThat(response).isNotNull();
         assertThat(response.length).isEqualTo(5);
     }
@@ -29,22 +27,19 @@ public class ConeIntegrationTests extends AbstractIntegrationTests {
 
 
     @Test
-    void conePOSTShouldReturnCreatedCone_WhenParametersCorrect() {
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void conePOSTShouldReturnCreatedCone_WhenCorrectBody() {
         final String coneName = "new cone";
         var body = new HttpEntity<>(new ConeDTO(-1, coneName), null);
-        ConeDTO response = this.restTemplate.postForObject(super.getUrl("cone", -1), body, ConeDTO.class);
+        ConeDTO response = super.exchangeAndExpectStatus(super.getUrl("cone", -1), HttpMethod.POST, body, 200, ConeDTO.class);
         assertThat(response).isNotNull();
         assertThat(response.id()).isGreaterThan(0);
         assertThat(response.name()).isEqualTo(coneName);
     }
 
     @Test
-    void conePOSTShouldReturnBadRequest_WhenParametersMissing() {
-        try {
-            this.restTemplate.postForObject(super.getUrl("cone", -1), null, ConeDTO.class, new HashMap<String, String>());
-        } catch (HttpClientErrorException e) {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
-        }
+    void conePOSTShouldReturnBadRequest_WhenBodyMissing() {
+        super.exchangeAndExpectStatus(super.getUrl("cone", -1), HttpMethod.POST, null, 400, ConeDTO.class);
     }
 
 
@@ -52,7 +47,7 @@ public class ConeIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void coneGETWithIdShouldReturnCone_WhenIdFound() {
-        ConeDTO response = this.restTemplate.getForObject(super.getUrl("cone", 1), ConeDTO.class);
+        ConeDTO response = super.exchangeAndExpectStatus(super.getUrl("cone", 1), HttpMethod.GET, null, 200, ConeDTO.class);
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(1);
         assertThat(response.name()).isEqualTo("waffle cone");
@@ -60,11 +55,7 @@ public class ConeIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void coneGETWithIdShouldReturnNotFound_WhenIdNotFound() {
-        try {
-            this.restTemplate.getForEntity(super.getUrl("cone", 1234), ConeDTO.class);
-        } catch (HttpClientErrorException e) {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(404));
-        }
+        super.exchangeAndExpectStatus(super.getUrl("cone", 1234), HttpMethod.GET, null, 404, ConeDTO.class);
     }
 
 
@@ -73,30 +64,30 @@ public class ConeIntegrationTests extends AbstractIntegrationTests {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void coneDELETEWithIdShouldDeleteCone_WhenIdFound() {
-        final int deletedId = 1;
+        final int deleteId = 1;
 
         // Cone exists
-        var response = this.restTemplate.getForEntity(super.getUrl("cone", deletedId), ConeDTO.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
+        super.exchangeAndExpectStatus(super.getUrl("cone", deleteId), HttpMethod.GET, null, 200, ConeDTO.class);
 
         // Cone delete succeeds
-        this.restTemplate.delete(super.getUrl("cone", deletedId));
+        super.exchangeAndExpectStatus(super.getUrl("cone", deleteId), HttpMethod.DELETE, null, 200, ConeDTO.class);
 
         // Cone doesn't exist
-        try {
-            this.restTemplate.getForEntity(super.getUrl("cone", deletedId), ConeDTO.class);
-        } catch (HttpClientErrorException e) {
-            assertThat(e.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(404));
-        }
+        super.exchangeAndExpectStatus(super.getUrl("cone", deleteId), HttpMethod.GET, null, 404, ConeDTO.class);
     }
 
     @Test
-    void coneDELETEWithIdShouldReturnNotFound_WhenIdNotFound() {
-        try {
-            this.restTemplate.delete(super.getUrl("cone", 1234));
-        } catch (HttpClientErrorException ex) {
-            assertThat(ex.getStatusCode()).isEqualTo(HttpStatusCode.valueOf((404)));
-        }
+    void coneDELETEWithIdShouldReturnConflict_WhenIdFound_AndConeIsReferenced() {
+
+        // Cone id=2 is referenced in a product
+        final int deleteId = 2;
+
+        super.exchangeAndExpectStatus(super.getUrl("cone", deleteId), HttpMethod.DELETE, null, 409, ConeDTO.class);
+    }
+
+    @Test
+    void coneDELETEWithIdShouldReturnNoContent_WhenIdNotFound() {
+        super.exchangeAndExpectStatus(super.getUrl("cone", 1234), HttpMethod.DELETE, null, 204, ConeDTO.class);
     }
 
 }
