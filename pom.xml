@@ -8,9 +8,9 @@
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../IceCreamParlor</relativePath>
 	</parent>
-	<artifactId>IceCreamParlor-CustomerService</artifactId>
+	<artifactId>IceCreamParlor-MenuService</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>IceCreamParlor-CustomerService</name>
+	<name>IceCreamParlor-MenuiService</name>
 	<description>Demo project for Spring Boot: Customer Service API</description>
 	<url/>
 	<properties>
@@ -129,6 +129,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>

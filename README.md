@@ -1,6 +1,6 @@
-# Ice-Cream Parlor: Customer Service
+# Ice-Cream Parlor: Menu Service
 
-This is a Spring Boot microservice that implements the *public API* and the *admin API* of the software.
+This is a Spring Boot microservice that implements the *Menu API* of the software.
 
 ## Some technologies used:
 - Spring Boot, Spring Web, Spring JPA, Spring validation

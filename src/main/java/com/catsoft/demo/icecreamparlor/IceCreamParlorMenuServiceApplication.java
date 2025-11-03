@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class IceCreamParlorCustomerServiceApplication {
+public class IceCreamParlorMenuServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IceCreamParlorCustomerServiceApplication.class, args);
+		SpringApplication.run(IceCreamParlorMenuServiceApplication.class, args);
 	}
 }

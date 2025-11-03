@@ -1,2 +1,2 @@
-docker build --tag icecreamparlor-customerservice .
+docker build --tag icecreamparlor-menuservice .
 
