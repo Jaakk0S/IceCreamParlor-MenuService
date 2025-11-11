@@ -1,8 +1,8 @@
 # Ice-Cream Parlor: Menu Service
 
-This is a Spring Boot microservice that implements the *Menu API* of the software.
+This Spring Boot microservice implements the *Menu API* of Ice-Cream Parlor demo app.
 
-## Some technologies used:
+## Technologies used:
 - Spring Boot, Spring Web, Spring JPA, Spring validation
 - H2 in-memory database
 - Lombok
@@ -10,5 +10,4 @@ This is a Spring Boot microservice that implements the *Menu API* of the softwar
 - Lambdas, Streams, Optionals (Java 8)
 
 ## Additional points
-- Tests are against the REST API directly
-- Because the service is a simple CRUD, there are no unit tests and there is no separate service layer. These are needed if there's any business logic.
+- Tests are run on the REST API
