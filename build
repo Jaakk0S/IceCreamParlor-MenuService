@@ -1,0 +1,4 @@
+#!/bin/sh
+
+./mvnw clean package
+docker build -t icecreamparlor-menuservice --target production .

@@ -9,5 +9,23 @@ This Spring Boot microservice implements the *Menu API* of Ice-Cream Parlor demo
 - Records (Java 14)
 - Lambdas, Streams, Optionals (Java 8)
 
-## Additional points
-- Tests are run on the REST API
+## Running Tests
+
+Tests are integration tests for the REST API and service layer. They are run using an in-memory H2 database.
+
+Run
+
+```
+./mvnw clean test
+```
+
+## Building
+
+Run
+
+```
+./build
+```
+
+This will produce the Docker image *icecreamparlor-menuservice*.
+
