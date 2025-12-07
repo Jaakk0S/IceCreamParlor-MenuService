@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 @RestController
-@RequestMapping(path="/admin/v1")
+@RequestMapping(path="/menu/v1")
 public class ToppingController {
 
 

@@ -28,7 +28,7 @@ public abstract class AbstractIntegrationTests {
     protected TestRestTemplate restTemplate;
 
     protected String getUrl(String methodName, int id) {
-        var url = "http://localhost:%d/admin/v1/%s";
+        var url = "http://localhost:%d/menu/v1/%s";
         if (id >= 0)
             url += "/" + id;
         return String.format(url, this.port, methodName);
