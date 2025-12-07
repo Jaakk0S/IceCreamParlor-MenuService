@@ -1,22 +1,17 @@
 package com.catsoft.demo.icecreamparlor.web;
 
-import com.catsoft.demo.icecreamparlor.dto.ConeDTO;
-import com.catsoft.demo.icecreamparlor.dto.FlavorDTO;
 import com.catsoft.demo.icecreamparlor.dto.FlavorDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.web.client.HttpClientErrorException;
-
-import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@DirtiesContext
 public class FlavorIntegrationTests extends AbstractIntegrationTests {
 
 

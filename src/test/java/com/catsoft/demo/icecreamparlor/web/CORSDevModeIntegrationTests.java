@@ -4,10 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.*;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {"dev.mode=true"})
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = { "dev.mode=true" })
+@DirtiesContext
 public class CORSDevModeIntegrationTests extends AbstractIntegrationTests {
 
     @Test

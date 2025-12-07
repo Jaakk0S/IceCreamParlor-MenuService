@@ -1,4 +1,4 @@
-package com.catsoft.demo.icecreamparlor;
+package com.catsoft.demo.icecreamparlor.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,7 +7,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.config.annotation.CorsRegistration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /*
@@ -15,7 +14,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     If dev.mode == true, all origins are allowed. Otherwise, only those listed in cors-whitelist.properties
  */
 @Configuration
-@EnableWebMvc
 @PropertySource("classpath:cors-whitelist.properties")
 public class CorsConfig implements WebMvcConfigurer {
 
@@ -23,7 +21,7 @@ public class CorsConfig implements WebMvcConfigurer {
     private Environment env;
 
     @Value("${dev.mode}")
-    private boolean devMode;
+    public boolean devMode;
 
     private CorsRegistration setOrigins(CorsRegistration registration) {
         if (this.devMode)
