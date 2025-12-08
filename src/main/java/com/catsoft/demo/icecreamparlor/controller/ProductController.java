@@ -36,12 +36,12 @@ public class ProductController {
     private ApplicationContext context;
 
 
-    @GetMapping("/menu-entry")
+    @GetMapping("/product")
     List<ProductDTO> getAllProducts() {
         return StreamSupport.stream(this.productRepository.findAll().spliterator(), false).map(p -> p.toDTO(false)).toList();
     }
 
-    @PostMapping("/menu-entry")
+    @PostMapping("/product")
     ProductDTO addProduct(@Valid @RequestBody ProductDTO product) {
         Product entity = Product.builder()
                 .name(product.name())
@@ -56,14 +56,14 @@ public class ProductController {
         return entity.toDTO(false);
     }
 
-    @GetMapping("/menu-entry/{id}")
+    @GetMapping("/product/{id}")
     ProductDTO getProduct(@PathVariable Integer id) {
         return this.productRepository.findById(id).map(p -> p.toDTO(false)).orElseThrow(() -> {
             return new ResponseStatusException(HttpStatusCode.valueOf(404));
         });
     }
 
-    @DeleteMapping("/menu-entry/{id}")
+    @DeleteMapping("/product/{id}")
     void deleteProduct(@PathVariable Integer id) {
         this.productRepository.deleteById(id);
         throw new ResponseStatusException(HttpStatusCode.valueOf(204));
