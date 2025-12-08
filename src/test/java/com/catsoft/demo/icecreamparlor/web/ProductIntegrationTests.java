@@ -29,7 +29,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void menuEntryGETShouldReturnAllProducts() {
-        ProductDTO[] response = super.exchangeAndExpectStatus(super.getUrl("product", -1), HttpMethod.GET, null, 200, ProductDTO[].class);
+        ProductDTO[] response = super.exchangeAndExpectStatus(super.getUrl("products", -1), HttpMethod.GET, null, 200, ProductDTO[].class);
         assertThat(response).isNotNull();
         assertThat(response.length).isEqualTo(4);
     }

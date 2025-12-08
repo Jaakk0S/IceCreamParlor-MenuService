@@ -36,7 +36,7 @@ public class ProductController {
     private ApplicationContext context;
 
 
-    @GetMapping("/product")
+    @GetMapping("/products")
     List<ProductDTO> getAllProducts() {
         return StreamSupport.stream(this.productRepository.findAll().spliterator(), false).map(p -> p.toDTO(false)).toList();
     }
