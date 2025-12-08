@@ -29,7 +29,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void menuEntryGETShouldReturnAllProducts() {
-        ProductDTO[] response = super.exchangeAndExpectStatus(super.getUrl("menu-entry", -1), HttpMethod.GET, null, 200, ProductDTO[].class);
+        ProductDTO[] response = super.exchangeAndExpectStatus(super.getUrl("product", -1), HttpMethod.GET, null, 200, ProductDTO[].class);
         assertThat(response).isNotNull();
         assertThat(response.length).isEqualTo(4);
     }
@@ -52,7 +52,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
                 List.of(new ToppingDTO(1, "nameDoesntMatter", null))
         );
         var body = new HttpEntity<>(payload, null);
-        ProductDTO response = super.exchangeAndExpectStatus(super.getUrl("menu-entry", -1), HttpMethod.POST, body, 200, ProductDTO.class);
+        ProductDTO response = super.exchangeAndExpectStatus(super.getUrl("product", -1), HttpMethod.POST, body, 200, ProductDTO.class);
         assertThat(response).isNotNull();
         assertThat(response.id()).isGreaterThan(0);
 
@@ -67,7 +67,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void menuEntryPOSTShouldReturnBadRequest_WhenRequestBodyIsMissing() {
-        super.exchangeAndExpectStatus(super.getUrl("menu-entry", -1), HttpMethod.POST, null, 400, ProductDTO.class);
+        super.exchangeAndExpectStatus(super.getUrl("product", -1), HttpMethod.POST, null, 400, ProductDTO.class);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
                 List.of(new ToppingDTO(0, "nameDoesntMatter", null))
         );
         var body = new HttpEntity<ProductDTO>(payload, null);
-        ResponseEntity<Object> result = this.restTemplate.exchange(super.getUrl("menu-entry", -1), HttpMethod.POST, body, Object.class);
+        ResponseEntity<Object> result = this.restTemplate.exchange(super.getUrl("product", -1), HttpMethod.POST, body, Object.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
     }
 
@@ -89,7 +89,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void menuEntryGETWithIdShouldReturnProduct_WhenIdFound() {
-        ProductDTO response = super.exchangeAndExpectStatus(super.getUrl("menu-entry", 1), HttpMethod.GET, null, 200, ProductDTO.class);
+        ProductDTO response = super.exchangeAndExpectStatus(super.getUrl("product", 1), HttpMethod.GET, null, 200, ProductDTO.class);
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(1);
         assertThat(response.name()).isEqualTo("Fudge Sundae");
@@ -102,7 +102,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void menuEntryGETWithIdShouldReturnNotFound_WhenIdNotFound() {
-        super.exchangeAndExpectStatus(super.getUrl("menu-entry", 1234), HttpMethod.GET, null, 404, ProductDTO.class);
+        super.exchangeAndExpectStatus(super.getUrl("product", 1234), HttpMethod.GET, null, 404, ProductDTO.class);
     }
 
 
@@ -114,13 +114,13 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
         final int deleteId = 1;
 
         // Product exists
-        super.exchangeAndExpectStatus(super.getUrl("menu-entry", deleteId), HttpMethod.GET, null, 200, ProductDTO.class);
+        super.exchangeAndExpectStatus(super.getUrl("product", deleteId), HttpMethod.GET, null, 200, ProductDTO.class);
 
         // Product delete succeeds
-        super.exchangeAndExpectStatus(super.getUrl("menu-entry", deleteId), HttpMethod.DELETE, null, 204, ProductDTO.class);
+        super.exchangeAndExpectStatus(super.getUrl("product", deleteId), HttpMethod.DELETE, null, 204, ProductDTO.class);
 
         // Product doesn't exist
-        super.exchangeAndExpectStatus(super.getUrl("menu-entry", deleteId), HttpMethod.GET, null, 404, ProductDTO.class);
+        super.exchangeAndExpectStatus(super.getUrl("product", deleteId), HttpMethod.GET, null, 404, ProductDTO.class);
 
         // ManyToMany join table is cascaded upon deletion
         Object[] productToppingsWithProductId = this.productRepository.findRowsInProductToppings(deleteId);
@@ -129,7 +129,7 @@ public class ProductIntegrationTests extends AbstractIntegrationTests {
 
     @Test
     void menuEntryDELETEWithIdShouldReturnNotFound_WhenIdNotFound() {
-        super.exchangeAndExpectStatus(super.getUrl("menu-entry", 1234), HttpMethod.DELETE, null, 204, ProductDTO.class);
+        super.exchangeAndExpectStatus(super.getUrl("product", 1234), HttpMethod.DELETE, null, 204, ProductDTO.class);
     }
 
 }
