@@ -27,5 +27,11 @@ Run
 ./build
 ```
 
+or
+
+```
+./build omit_tests
+```
+
 This will produce the Docker image *icecreamparlor-menuservice*.
 

@@ -1,5 +1,6 @@
 FROM ubuntu:24.04 AS base
 
+RUN echo "deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse" >>/etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y openjdk-25-jdk maven curl
 
