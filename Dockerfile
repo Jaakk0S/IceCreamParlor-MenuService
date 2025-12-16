@@ -1,8 +1,7 @@
 FROM ubuntu:24.04 AS base
 
-RUN echo "deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse" >>/etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y openjdk-25-jdk maven curl
+RUN apt-get install -y openjdk-25-jdk maven
 
 
 
@@ -17,6 +16,10 @@ RUN mvn clean package
 
 
 FROM eclipse-temurin:25-jre-alpine-3.22 AS production
+
+RUN echo "deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse" >>/etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install curl
 
 COPY --from=build target/*.jar /app.jar
 
