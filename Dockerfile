@@ -17,9 +17,7 @@ RUN mvn clean package
 
 FROM eclipse-temurin:25-jre-alpine-3.22 AS production
 
-RUN echo "deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse" >>/etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install curl
+RUN apk --no-cache add curl
 
 COPY --from=build target/*.jar /app.jar
 

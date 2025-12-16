@@ -1,10 +1,4 @@
 #!/bin/sh
 set -e -x
 
-if [ "$1" == 'omit_tests' ]; then
-  ./mvnw clean package -DskipTests
-else
-  ./mvnw clean package
-fi
-
 docker build -t icecreamparlor-menuservice --target production .
